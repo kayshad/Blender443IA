@@ -1,0 +1,9 @@
+KaysMathClaude/
+├── __init__.py              # Point d'entrée avec annotations
+├── translations.py          # Dictionnaires typés
+├── preferences.py          # Préférences avec types
+├── preset_manager.py       # Gestionnaire typé
+├── properties.py           # Propriétés annotées
+├── operators.py            # Opérateurs avec types
+├── panels.py              # Panneaux annotés
+└── utils.py               # Utilitaires typés
