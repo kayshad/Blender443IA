@@ -12,6 +12,7 @@
 - Ce module utilise SymPy (installateur intégré dans les Préférences).
 - Si l’installation automatique échoue, ouvrez une console Blender et tapez :
   `import pip; pip.main(['install', 'sympy'])`
+- ou bien ligne de commande Blender : blender --python-expr "import pip; pip.main(['install', 'sympy'])". 
 
 ## Support
 Pour toute question : [Votre contact ou email]
