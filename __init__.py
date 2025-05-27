@@ -9,7 +9,7 @@ bl_info = {
     "description": "Système stable de gestion de presets pour courbes mathématiques",
     "author": "TonNom + Assistant",
     "version": (4, 2),
-    "blender": (4, 4, 0),
+    "blender": (4, 4, 3),
     "location": "View3D > Sidebar > Courbes du Plan",
     "category": "Add Curve"
 }
