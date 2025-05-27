@@ -33,6 +33,37 @@ OperatorReturn = Set[str]
 Vertex3D = Tuple[float, float, float]
 VertexList = List[Vertex3D]
 
+
+class PLAN_CURVES_OT_clean_scene(Operator):
+    """Nettoie la scène : supprime tous les objets sauf ceux dans la collection 'Stable' et purge les orphelins."""
+
+    bl_idname = "plan_curves.clean_scene"
+    bl_label = "Nettoyer la scène (sauf Stable)"
+    bl_description = "Supprime tous les objets sauf ceux de la collection 'Stable' et purge les orphelins"
+
+    def execute(self, context):
+        stable_col = bpy.data.collections.get("Stable")
+        stable_objs = set()
+        if stable_col:
+            stable_objs = set(stable_col.objects)
+
+        # Supprimer tous les objets sauf ceux de 'Stable'
+        for obj in list(bpy.data.objects):
+            if obj not in stable_objs:
+                bpy.data.objects.remove(obj, do_unlink=True)
+
+        # Purge des orphelins
+        # (Depuis Blender 3.x : bpy.ops.outliner.orphans_purge() n'est accessible qu'en contexte OUTLINER, sinon il faut faire à la main)
+        for datablock in [bpy.data.meshes, bpy.data.curves, bpy.data.materials, bpy.data.images, bpy.data.textures]:
+            for datab in list(datablock):
+                if datab.users == 0:
+                    datablock.remove(datab)
+        self.report({'INFO'}, "Scène nettoyée, orphelins purgés (Stable conservé)")
+        return {'FINISHED'}
+
+
+
+
 class PLAN_CURVES_OT_refresh_presets(Operator):
     """Rafraîchit la liste des presets."""
 
@@ -339,7 +370,7 @@ class PLAN_CURVES_OT_generate_curve(Operator):
 
             # ✅ Configuration sécurisée des inputs
             if hasattr(geo_mod, "__setitem__"):
-                geo_mod["Input_2"] = 0.05  # Radius
+                geo_mod["Input_2"] = 0.01  # Radius
             else:
                 # Méthode alternative pour les versions plus récentes
                 for input_socket in geo_mod.node_group.interface.items_tree:
@@ -556,6 +587,7 @@ classes: Tuple[type, ...] = (
     PLAN_CURVES_OT_delete_preset_simple,
     PLAN_CURVES_OT_validate_params,
     PLAN_CURVES_OT_generate_curve,
+    PLAN_CURVES_OT_clean_scene,
 )
 
 def register() -> None:

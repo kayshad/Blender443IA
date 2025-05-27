@@ -24,12 +24,6 @@ class PLAN_CURVES_PT_main(Panel):
     bl_category: str = "Courbes"
 
     def draw(self, context: Context) -> None:
-        """
-        Dessine le panneau principal.
-
-        Args:
-            context: Contexte Blender
-        """
         layout: UILayout = self.layout
         props = context.scene.plan_curves_props
 
@@ -71,14 +65,11 @@ class PLAN_CURVES_PT_main(Panel):
         # Génération
         self._draw_generation_section(layout)
 
-    def _draw_parameters_section(self, layout: UILayout, props) -> None:
-        """
-        Dessine la section des paramètres.
+        # === BOUTON NETTOYAGE DE SCÈNE (NOUVEAU) ===
+        layout.separator()
+        layout.operator("plan_curves.clean_scene", icon='TRASH')
 
-        Args:
-            layout: Layout parent
-            props: Propriétés de l'addon
-        """
+    def _draw_parameters_section(self, layout: UILayout, props) -> None:
         param_box: UILayout = layout.box()
         param_box.label(text=get_text('parameters'), icon='SETTINGS')
 
@@ -104,13 +95,6 @@ class PLAN_CURVES_PT_main(Panel):
         param_box.prop(props, "resolution", text=get_text('resolution'))
 
     def _draw_validation_section(self, layout: UILayout, props) -> None:
-        """
-        Dessine la section de validation.
-
-        Args:
-            layout: Layout parent
-            props: Propriétés de l'addon
-        """
         val_box: UILayout = layout.box()
         val_box.label(text=get_text('validation'), icon='CHECKMARK')
         val_box.operator("plan_curves.validate_params",
@@ -127,12 +111,6 @@ class PLAN_CURVES_PT_main(Panel):
                 msg_box.label(text=props.validation_message, icon='ERROR')
 
     def _draw_generation_section(self, layout: UILayout) -> None:
-        """
-        Dessine la section de génération.
-
-        Args:
-            layout: Layout parent
-        """
         layout.separator()
         row: UILayout = layout.row()
         row.scale_y = 1.5
@@ -140,6 +118,7 @@ class PLAN_CURVES_PT_main(Panel):
         row.operator("plan_curves.generate_curve",
                     text=get_text('generate_curve'),
                     icon='CURVE_DATA')
+
 
 class PLAN_CURVES_PT_presets(Panel):
     """Panneau des presets avec annotations complètes."""
@@ -152,12 +131,6 @@ class PLAN_CURVES_PT_presets(Panel):
     bl_options: set = {'DEFAULT_CLOSED'}
 
     def draw(self, context: Context) -> None:
-        """
-        Dessine le panneau des presets.
-
-        Args:
-            context: Contexte Blender
-        """
         layout: UILayout = self.layout
         props = context.scene.plan_curves_props
 
@@ -191,25 +164,12 @@ class PLAN_CURVES_PT_presets(Panel):
 
     def _draw_preset_list(self, parent: UILayout, preset_names: List[str],
                          curve_type: str, manager: SimplePresetManager) -> None:
-        """
-        Dessine la liste des presets.
-
-        Args:
-            parent: Layout parent
-            preset_names: Liste des noms de presets
-            curve_type: Type de courbe actuel
-            manager: Gestionnaire de presets
-        """
         col: UILayout = parent.column(align=True)
         for name in preset_names:
             row: UILayout = col.row(align=True)
-
-            # Bouton de chargement
             op = row.operator("plan_curves.load_preset_simple",
                             text=name, icon='IMPORT')
             op.preset_name = name
-
-            # Bouton de suppression pour presets utilisateur
             preset_data: Optional[PresetData] = manager.get_preset_by_name(curve_type, name)
             if preset_data and preset_data.get('editable', False):
                 op_del = row.operator("plan_curves.delete_preset_simple",
@@ -217,28 +177,14 @@ class PLAN_CURVES_PT_presets(Panel):
                 op_del.preset_name = name
 
     def _draw_preset_creation_section(self, layout: UILayout, props) -> None:
-        """
-        Dessine la section de création de presets.
-
-        Args:
-            layout: Layout parent
-            props: Propriétés de l'addon
-        """
         layout.separator()
         create_box: UILayout = layout.box()
         create_box.label(text=get_text('create_preset'), icon='PLUS')
         create_box.prop(props, "new_preset_name", text=get_text('preset_name'))
         create_box.prop(props, "new_preset_description", text=get_text('description'))
-        create_box.operator("plan_curves.create_preset_simple", icon='FILE_NEW')
+        create_box.operator("plan_curves.create_preset_simple", text=get_text('create_preset'), icon='FILE_NEW')
 
     def _draw_messages_section(self, layout: UILayout, props) -> None:
-        """
-        Dessine la section des messages.
-
-        Args:
-            layout: Layout parent
-            props: Propriétés de l'addon
-        """
         if props.preset_message:
             msg_box: UILayout = layout.box()
             if "✓" in props.preset_message:
@@ -248,14 +194,6 @@ class PLAN_CURVES_PT_presets(Panel):
 
     def draw_preset_details(self, parent_layout: UILayout, props,
                            manager: SimplePresetManager) -> None:
-        """
-        Affiche les détails du preset sélectionné.
-
-        Args:
-            parent_layout: Layout parent
-            props: Propriétés de l'addon
-            manager: Gestionnaire de presets
-        """
         try:
             preset_data: Optional[PresetData] = manager.get_preset_by_name(
                 props.curve_type, props.selected_preset
@@ -291,81 +229,9 @@ classes: Tuple[type, ...] = (
 )
 
 def register() -> None:
-    """Enregistre les classes du module panels."""
     for cls in classes:
         bpy.utils.register_class(cls)
 
 def unregister() -> None:
-    """Désenregistre les classes du module panels."""
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
-
-# ===============================================
-# GUIDE PRATIQUE POUR LES ANNOTATIONS PYTHON
-# ===============================================
-
-"""
-📚 GUIDE COMPLET DES ANNOTATIONS PYTHON UTILISÉES
-
-🔹 IMPORTS ESSENTIELS :
-```python
-from __future__ import annotations  # Permet les annotations forward
-from typing import TYPE_CHECKING, Optional, List, Dict, Tuple, Set, Union, Any
-```
-
-🔹 TYPE ALIASES (améliore la lisibilité) :
-```python
-PresetData = Dict[str, Any]
-VertexList = List[Tuple[float, float, float]]
-OperatorReturn = Set[str]
-```
-
-🔹 ANNOTATIONS DE FONCTIONS :
-```python
-def function_name(param: ParamType) -> ReturnType:
-    '''Docstring avec description des args et return'''
-    pass
-```
-
-🔹 ANNOTATIONS DE VARIABLES :
-```python
-my_var: int = 42
-my_list: List[str] = ["a", "b", "c"]
-optional_value: Optional[str] = None
-```
-
-🔹 ANNOTATIONS BLENDER SPÉCIFIQUES :
-```python
-# Propriétés Blender (type: ignore pour éviter les warnings mypy)
-my_prop: bpy.props.StringProperty() = bpy.props.StringProperty()  # type: ignore
-
-# Types Blender courants
-from bpy.types import Context, UILayout, Object, Operator
-```
-
-🔹 TYPE_CHECKING (évite les imports circulaires) :
-```python
-if TYPE_CHECKING:
-    from bpy.types import Context  # Import seulement pour le type checking
-```
-
-🔹 AVANTAGES DES ANNOTATIONS :
-✅ Meilleure lisibilité du code
-✅ Détection d'erreurs avec mypy/pyright
-✅ Autocomplétion améliorée dans l'IDE
-✅ Documentation automatique
-✅ Maintenance facilitée
-✅ Collaboration en équipe
-
-🔹 OUTILS RECOMMANDÉS :
-- mypy : vérification statique des types
-- pylint : analyse de code
-- black : formatage automatique
-- VS Code avec Python extension
-
-Cette structure avec annotations complètes rend le code :
-- Plus professionnel
-- Moins sujet aux erreurs
-- Plus facile à maintenir
-- Plus accessible aux nouveaux développeurs
-"""
